@@ -2,8 +2,7 @@ const express=require('express'),
 {Pool}=require('pg'),crypto=require('crypto'),fs=require('fs');
 const app=express(),URL=process.env.DATABASE_URL||'',db=new 
 Pool({connectionString:URL,options:'-c search_path=vendas,public',max:1,ssl:/localhost|127\.0\.0\.1/.test(URL)?false:{rejectUnauthorized:false}});
-const SECRET=process.env.SESSION_SECRET||'troque-este-segredo',MATRIZ='Gerente da 
-matriz',ROLES=['Analista comercial','Gerente de filial',MATRIZ],COLL=
+const SECRET=process.env.SESSION_SECRET||'troque-este-segredo',MATRIZ='Gerente da matriz',ROLES=['Analista comercial','Gerente de filial',MATRIZ],COLL=
 const SECRET=process.env.SESSION_SECRET||'troque-este-segredo',MATRIZ='Gerente da matriz',ROLES=['Analista comercial','Gerente de filial',MATRIZ],COLL=['sales','reqs','cobs','config'];
 {console.error(e);s.status(500).json({erro:'Banco indisponível.'})}));
 const sign=v=>crypto.createHmac('sha256',SECRET).update(v).digest('hex');
