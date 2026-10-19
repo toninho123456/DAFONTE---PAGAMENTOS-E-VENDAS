@@ -1,4 +1,4 @@
-const express=require('express'),{Pool}=require('pg'),crypto=require('crypto');
+  const express=require('express'),{Pool}=require('pg'),crypto=require('crypto');
 const app=express(),URL=process.env.DATABASE_URL||'',db=new Pool({connectionString:URL,options:'-c search_path=vendas,public',ssl:/localhost|127\.0\.0\.1/.test(URL)?false:{rejectUnauthorized:false}});
 const SECRET=process.env.SESSION_SECRET||'troque-este-segredo',MATRIZ='Gerente da matriz',ROLES=['Analista comercial','Gerente de filial',MATRIZ],COLL=['sales','reqs','cobs','config'];
 app.use(express.json({limit:'1mb'}));app.use('/api', (req, res, next) => {
@@ -48,7 +48,40 @@ if(!COLL.includes(c))return bad(res,404,'Coleção inválida.');
 if(c==='config'&&!isM(u))return bad(res,403,'Só a matriz altera configurações.');
 if(!await allowed(u,c,id))return bad(res,403,'Sem permissão.');
 if(c==='sales'&&!isM(u))d.fi=u.fi;
-await db.query('insert into docs(coll,id,data) values($1,$2,$3) on conflict(coll,id) do update set data=excluded.data',[c,id,d]);res.json({ok:1})}catch(e){console.error(e);bad(res,500,'Erro no servidor.')}});
+if (!process.env.DATABASE_URL) {
+  app.listen(process.env.PORT || 3000, () => {
+    console.log('Servidor no ar em modo de demonstração.');
+  });
+} else {
+  db.query(`
+    CREATE SCHEMA IF NOT EXISTS vendas;
+
+    CREATE TABLE IF NOT EXISTS vendas.users (
+      id serial PRIMARY KEY,
+      email text UNIQUE NOT NULL,
+      hash text NOT NULL,
+      nome text,
+      tel text,
+      mat text,
+      fi text,
+      role text
+    );
+
+    CREATE TABLE IF NOT EXISTS vendas.docs (
+      coll text,
+      id text,
+      data jsonb,
+      PRIMARY KEY (coll, id)
+    );
+  `).then(() => {
+    app.listen(process.env.PORT || 3000, () => {
+      console.log('Servidor no ar.');
+    });
+  }).catch(e => {
+    console.error('Falha ao inicializar o banco:', e);
+    process.exit(1);
+  });
+}
 app.delete('/api/c/:c/:id',auth,async(req,res)=>{try{const{c,id}=req.params,u=req.u;
 if(!COLL.includes(c))return res.json({ok:1});
 if(c==='config'&&!isM(u))return bad(res,403,'Só a matriz altera configurações.');
