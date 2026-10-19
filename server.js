@@ -1,7 +1,14 @@
 const express=require('express'),{Pool}=require('pg'),crypto=require('crypto');
 const app=express(),URL=process.env.DATABASE_URL||'',db=new Pool({connectionString:URL,options:'-c search_path=vendas,public',ssl:/localhost|127\.0\.0\.1/.test(URL)?false:{rejectUnauthorized:false}});
 const SECRET=process.env.SESSION_SECRET||'troque-este-segredo',MATRIZ='Gerente da matriz',ROLES=['Analista comercial','Gerente de filial',MATRIZ],COLL=['sales','reqs','cobs','config'];
-app.use(express.json({limit:'1mb'}));
+app.use(express.json({limit:'1mb'}));app.use('/api', (req, res, next) => {
+  if (!process.env.DATABASE_URL) {
+    return res.status(503).json({
+      erro: 'Modo de demonstração: banco de dados desativado.'
+    });
+  }
+  next();
+});
 const sign=v=>crypto.createHmac('sha256',SECRET).update(v).digest('hex');
 const hash=(p,s=crypto.randomBytes(16).toString('hex'))=>s+':'+crypto.scryptSync(p,s,64).toString('hex');
 const check=(p,h)=>{const[s,k]=h.split(':'),a=Buffer.from(k,'hex'),b=crypto.scryptSync(p,s,64);return a.length===b.length&&crypto.timingSafeEqual(a,b)};
