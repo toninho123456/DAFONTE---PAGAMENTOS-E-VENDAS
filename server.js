@@ -11,9 +11,7 @@ const hash=
 (p,s=crypto.randomBytes(16).toString('hex'))=>s+':'+crypto.scryptSync(p,s,64).toStrin
 g('hex');
 const check=(p,h)=>
-{const[s,k]=h.split(':'),a=Buffer.from(k,'hex'),b=crypto.scryptSync(p,s,64);return 
-a.length===b.length&&crypto.timingSafeEqual(a,b)};
-const cookie=(req,res,v,age)=>res.setHeader('Set-Cookie',`s=${v}; HttpOnly; 
+const hash=(p,s=crypto.randomBytes(16).toString('hex'))=>s+':'+crypto.scryptSync(p,s,64).toString('hex');
 SameSite=Lax; Path=/; Max-Age=${age}${req.headers['x-forwarded-proto']==='https'?'; 
 Secure':''}`);
 function login(req,res,uid){const v=uid+'.'+
