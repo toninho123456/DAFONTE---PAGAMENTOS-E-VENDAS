@@ -60,7 +60,6 @@ dialog{border:1px solid var(--bd);border-radius:16px;background:var(--card);colo
 @keyframes driveR{from{transform:translateX(110vw) scaleX(-1)}to{transform:translateX(-45vw) scaleX(-1)}}
 header,main{position:relative;z-index:1}
 @media(prefers-reduced-motion:reduce){#bgfx{display:none}.wh,.trk,.c{animation:none}.trk{left:20px}}
-@media print{header,nav,.row,.fm,.noprint,.hero,#bgfx{display:none!important}body{background:#fff;color:#000}}
 header{background:linear-gradient(90deg,#000,#1c1c1c)}
 nav a.on{background:var(--dk);color:var(--on);border-color:var(--dk);box-shadow:0 5px 16px #0005}
 button{background:var(--dk);color:var(--on);box-shadow:0 4px 14px #0004}
@@ -99,6 +98,32 @@ header{flex-wrap:wrap;row-gap:10px}
 .anT span{display:block;font:700 13px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin-top:3px;border-top:2px solid #111;padding-top:3px}
 @media(max-width:600px){header{flex-wrap:nowrap;gap:8px;padding:8px 10px}.lg{height:52px}.nm b{font-size:21px;letter-spacing:-.5px}.nm span{font-size:9px;letter-spacing:.3em}.an{margin-left:auto;flex:1 1 auto;min-width:0;padding:8px 20px 8px 12px}.anI{display:none}.anT b{font-size:20px}.anT span{font-size:11px;line-height:1.15}}
 .go2{width:100%;margin-top:14px;padding:14px;font-size:16px;border-radius:14px;background:transparent;color:var(--tx);border:2px solid var(--ac);box-shadow:none}
+@page{size:A4 landscape;margin:10mm}
+@media print{
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+:root,:root:not([data-theme="light"]){--bg:#fff;--card:#fff;--tx:#111;--mu:#5f5a45;--bd:#eadfae;--ac:#f2b705;--gr:#111;--dk:#111;--on:#f2b705;--rd:#c0392b;--bl:#555}
+nav,.row,.fm,.noprint,.hero,#bgfx,button{display:none!important}
+html,body{background:#fff!important;color:#000!important;font-size:11px}
+header{padding:6px 12px!important;background:linear-gradient(90deg,#000,#1c1c1c)!important;border-bottom:4px solid #f2b705!important;margin-bottom:8px}
+header svg{height:44px!important}
+main{max-width:none!important;padding:0!important}
+h1{font-size:18px;margin:4px 0 6px}
+h2{font-size:14px;margin:14px 0 8px;break-after:avoid;page-break-after:avoid}
+.c{animation:none!important;box-shadow:none!important;transform:none!important;border-radius:8px;padding:10px;background:#fff!important;break-inside:avoid;page-break-inside:avoid}
+.c.tw{break-inside:auto;page-break-inside:auto;padding:0}
+.grid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.k b{font-size:20px}
+.tw{overflow:visible!important}
+table{font-size:10px;width:100%}
+th,td{padding:5px 4px;white-space:normal;word-break:break-word}
+thead{display:table-header-group}
+tr{break-inside:avoid;page-break-inside:avoid}
+th{background:#f2b705!important;color:#111!important}
+tbody tr:nth-child(even){background:#fff8d6!important}
+tbody tr:hover{background:none}
+.bar{break-inside:avoid}
+.q{background:#11111120!important;color:#111!important}.p{background:#55555522!important;color:#111!important}.n{background:#f2b70533!important;color:#8a6400!important}
+}
 </style>
 <style>
 :root[data-theme="dark"]{--bg:#0b0b0b;--card:#171717;--tx:#f5f5f5;--mu:#a8a28a;--bd:#2e2a1a;--gr:#f5f5f5;--dk:#f2b705;--on:#111;--rd:#ff7a6b;--bl:#bbb;color-scheme:dark}
@@ -208,7 +233,7 @@ else if(a=='rev'){DB.collection('approvals').doc(i).delete().catch(()=>{})}
 else if(a=='mail'){const v=$('ml').value.trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){$('me').textContent='E-mail inválido.';return}MAIL=v;try{localStorage.setItem('dafonte_mail',v)}catch(e){}if(DB&&ADM)DB.doc('config/mail').set({to:v}).catch(()=>{});render()}
 else if(a=='fotos'){(async()=>{const fs=[...($('ff').files||[])].slice(0,8),e=$('fe');if(!fs.length){e.textContent='Escolha as fotos primeiro.';return}try{const as=await claude.use('assets');if(!as){e.textContent='Envio de fotos indisponível para sua conta.';return}e.textContent='Enviando…';const ids=[];for(const f of fs)ids.push((await as.upload(f)).id);await DB.doc('config/bg').set({ids:[...BG,...ids].slice(-12)});e.textContent='Fotos enviadas.'}catch(x){e.textContent='Não foi possível enviar.'}})()}
 else if(a=='nofotos'){DB.doc('config/bg').set({ids:[]}).catch(()=>{})}
-else if(a=='pdf')print();
+else if(a=='pdf'){const t=document.title;document.title='Relatorio-Dafonte-'+new Date().toISOString().slice(0,10);print();document.title=t}
 else if(a=='csv'){const rows=[['Data','Cliente','Filial','Modelo','Modalidade','Total','Adiant. previsto','Recebido','Saldo','Situação'],...view().map(s=>[fd(s.dt),s.cl,s.fi,s.mo,s.md,s.total,adv(s),rec(s),sal(s),sit(s)])];
 const c=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(';')).join('\n'),l=document.createElement('a');l.href=URL.createObjectURL(new Blob(['\ufeff'+c],{type:'text/csv'}));l.download='vendas-dafonte.csv';l.click()}});
 render();
